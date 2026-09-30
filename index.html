@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Client - Pengujian Digital</title>
+    <meta name="author" content="INDRAYAZA. Z, S.E.">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex-grow: 1; font-size: 16px; }
+        textarea { width: 100%; height: 100px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; resize: vertical; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; width: 100%; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        #chat-box { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; min-height: 150px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-size: 15px; border: 1px solid #dee2e6; }
+        .loader { display: none; text-align: center; margin-top: 10px; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Multi-Model AI Interface</h2>
+    
+    <div class="controls">
+        <select id="model-select">
+            <option value="stealth/space-bunny-alpha">Space Bunny Alpha</option>
+            <option value="space-bunny-free">Space Bunny Free</option>
+        </select>
+    </div>
+
+    <textarea id="user-input" placeholder="Ketik prompt Anda di sini..."></textarea>
+    <button id="send-btn" onclick="sendMessage()">Kirim ke AI</button>
+    <div class="loader" id="loader">AI sedang memproses...</div>
+
+    <div id="chat-box">Hasil respons AI akan muncul di sini...</div>
+</div>
+
+<script>
+    // Endpoint mengarah ke folder backend lokal (Vercel akan membacanya otomatis)
+    const BACKEND_URL = "/api/chat"; 
+
+    async function sendMessage() {
+        const inputField = document.getElementById("user-input");
+        const chatBox = document.getElementById("chat-box");
+        const modelSelect = document.getElementById("model-select").value;
+        const sendBtn = document.getElementById("send-btn");
+        const loader = document.getElementById("loader");
+        const prompt = inputField.value.trim();
+
+        if (!prompt) return alert("Prompt tidak boleh kosong!");
+
+        inputField.value = "";
+        sendBtn.disabled = true;
+        loader.style.display = "block";
+        chatBox.innerHTML = "<em>Berkomunikasi dengan server...</em>";
+
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: modelSelect, 
+                    prompt: prompt 
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.error || "Terjadi kesalahan pada server.");
+            
+            chatBox.innerHTML = `<strong>Jawaban:</strong><br><br>${data.reply}`;
+
+        } catch (error) {
+            chatBox.innerHTML = `<span style="color: red;"><strong>Error:</strong> ${error.message}</span>`;
+        } finally {
+            sendBtn.disabled = false;
+            loader.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
