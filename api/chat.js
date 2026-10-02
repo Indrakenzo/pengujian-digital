@@ -1,48 +1,39 @@
 export default async function handler(req, res) {
-    // Keamanan: Tolak jika bukan POST
+    // Pastikan hanya menerima request tipe POST dari frontend
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
     const { model, prompt } = req.body;
 
-    // Pastikan prompt dan model tidak kosong
-    if (!prompt || !model) {
-        return res.status(400).json({ error: 'Model dan Prompt harus diisi' });
-    }
-
     try {
-        // Vercel Environment Variable (Rahasia)
+        // Mengambil kunci rahasia dari Environment Variable
         const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
         if (!OPENROUTER_API_KEY) {
-            throw new Error("API Key OpenRouter belum dikonfigurasi di Vercel Settings.");
+            throw new Error("API Key belum dikonfigurasi di server.");
         }
 
-        // Hit API OpenRouter
+        // Melakukan request ke OpenRouter
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json",
-                // Opsional: Untuk identifikasi aplikasi (dianjurkan oleh OpenRouter)
-                "HTTP-Referer": "https://pengujian-digital.vercel.app", 
-                "X-Title": "Pengujian Digital Workspace"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: model, // Menerima model secara dinamis dari frontend
+                model: model,
                 messages: [{ role: "user", content: prompt }]
             })
         });
 
         const data = await response.json();
         
-        // Tangkap error spesifik dari OpenRouter (misal model sedang down atau ID salah)
         if (!response.ok) {
-            throw new Error(data.error?.message || "Terjadi kesalahan pada OpenRouter");
+            throw new Error(data.error?.message || "Gagal menghubungi API pihak ketiga.");
         }
 
-        // Kembalikan jawaban ke frontend
+        // Mengirim balik teks hasil ke frontend
         res.status(200).json({ reply: data.choices[0].message.content });
 
     } catch (error) {
