@@ -3,44 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Client - Pengujian Digital</title>
-    <meta name="author" content="INDRAYAZA. Z, S.E.">
+    <title>AI Workspace - Pengujian Digital</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex-grow: 1; font-size: 16px; }
-        textarea { width: 100%; height: 100px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; resize: vertical; }
-        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; width: 100%; }
-        button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        #chat-box { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; min-height: 150px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-size: 15px; border: 1px solid #dee2e6; }
-        .loader { display: none; text-align: center; margin-top: 10px; color: #666; font-style: italic; }
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a53d0;
+            --bg-color: #e0e5ec;
+            --surface: #ffffff;
+            --text-main: #2b2d42;
+            --text-muted: #8d99ae;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgb(239, 246, 255) 0%, rgb(219, 228, 243) 90%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                inset 0 2px 0 rgba(255, 255, 255, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        /* 3D Neumorphic Select */
+        select {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background: var(--surface);
+            border: none;
+            border-radius: 16px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            box-shadow: 
+                6px 6px 12px rgba(163, 177, 198, 0.4), 
+                -6px -6px 12px rgba(255, 255, 255, 1);
+            transition: all 0.2s ease;
+        }
+        
+        select:focus {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 1);
+        }
+
+        /* Chat Area */
+        #chat-box {
+            background: var(--surface);
+            min-height: 250px;
+            max-height: 50vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.3), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            padding: 12px 18px;
+            border-radius: 16px;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .msg-user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .msg-ai {
+            background: #f0f4f8;
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Input Area */
+        .input-group {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 15px;
+            border-radius: 16px;
+            border: none;
+            background: var(--surface);
+            resize: none;
+            font-size: 1rem;
+            outline: none;
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.3), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        /* 3D Button */
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 
+                0 6px 0 var(--primary-hover),
+                0 10px 15px rgba(67, 97, 238, 0.3);
+            position: relative;
+        }
+
+        button:active {
+            top: 6px;
+            box-shadow: 
+                0 0 0 var(--primary-hover),
+                0 4px 6px rgba(67, 97, 238, 0.3);
+        }
+
+        button:disabled {
+            background-color: #a0aec0;
+            box-shadow: 0 6px 0 #718096;
+            cursor: not-allowed;
+        }
+        
+        button:disabled:active {
+            top: 0;
+            box-shadow: 0 6px 0 #718096;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Tablet & Desktop Responsiveness */
+        @media (min-width: 768px) {
+            .input-group {
+                flex-direction: row;
+                align-items: flex-end;
+            }
+            textarea {
+                flex-grow: 1;
+                margin-bottom: 0;
+            }
+            button {
+                width: 180px;
+                height: 80px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Multi-Model AI Interface</h2>
+<div class="app-container">
+    <div class="header-section">
+        <h2>AI Model Explorer</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Multi-Model Gratis via OpenRouter</p>
+    </div>
     
-    <div class="controls">
-        <select id="model-select">
-            <option value="stealth/space-bunny-alpha">Space Bunny Alpha</option>
-            <option value="space-bunny-free">Space Bunny Free</option>
-        </select>
+    <select id="model-select">
+        <!-- Daftar Model yang Anda Kumpulkan (Format ID OpenRouter) -->
+        <optgroup label="Qwen & Google">
+            <option value="qwen/qwen-3.8-27b:free">Qwen3.8 27B (Free)</option>
+            <option value="google/gemma-4-26b-a4b:free">Google Gemma 4 26B A4B (Free)</option>
+            <option value="google/gemma-4-31b:free">Google Gemma 4 31B (Free)</option>
+        </optgroup>
+        
+        <optgroup label="NVIDIA Nemotron">
+            <option value="nvidia/nemotron-3.5-lightning:free">NVIDIA Nemotron 3.5 Lightning (Free)</option>
+            <option value="nvidia/nemotron-3-ultra:free">NVIDIA Nemotron 3 Ultra (Free)</option>
+            <option value="nvidia/nemotron-3-nano-omni:free">NVIDIA Nemotron 3 Nano Omni (Free)</option>
+            <option value="nvidia/nemotron-3-super:free">NVIDIA Nemotron 3 Super (Free)</option>
+            <option value="nvidia/nemotron-3.5-content-safety:free">NVIDIA Content Safety (Free)</option>
+        </optgroup>
+
+        <optgroup label="Coding & Engineering">
+            <option value="poolside/laguna-s-2.1:free">Poolside Laguna S 2.1 (Free)</option>
+            <option value="poolside/laguna-xs-2.1:free">Poolside Laguna XS 2.1 (Free)</option>
+            <option value="cohere/north-mini-code:free">Cohere North Mini Code (Free)</option>
+        </optgroup>
+
+        <optgroup label="Lainnya">
+            <option value="inclusionai/ling-3-flash-sante:free">InclusionAI Ling 3.0 Flash Sante (Free)</option>
+            <option value="dots-studio/dots3-note-preview:free">Dots Studio Dots3-Note Preview (Free)</option>
+            <option value="liquidai/lfm-2.5-2.6b:free">LiquidAI LFM2.5-2.6B (Free)</option>
+            <option value="thinking-machines/inkling:free">Thinking Machines Inkling (Free)</option>
+            <option value="thinking-machines/inkling-small:free">Thinking Machines Inkling Small (Free)</option>
+        </optgroup>
+    </select>
+
+    <div id="chat-box">
+        <!-- Welcoming Message -->
+        <div class="message msg-ai">Halo! Silakan pilih model di atas dan mulai percakapan.</div>
     </div>
 
-    <textarea id="user-input" placeholder="Ketik prompt Anda di sini..."></textarea>
-    <button id="send-btn" onclick="sendMessage()">Kirim ke AI</button>
-    <div class="loader" id="loader">AI sedang memproses...</div>
+    <div class="loader" id="loader">Model sedang mengetik...</div>
 
-    <div id="chat-box">Hasil respons AI akan muncul di sini...</div>
+    <div class="input-group">
+        <textarea id="user-input" placeholder="Ketik prompt atau pertanyaan Anda di sini..."></textarea>
+        <button id="send-btn" onclick="sendMessage()">Kirim</button>
+    </div>
 </div>
 
 <script>
-    // Endpoint mengarah ke folder backend lokal (Vercel akan membacanya otomatis)
     const BACKEND_URL = "/api/chat"; 
+
+    // Fungsi agar bisa kirim pakai tombol Enter
+    document.getElementById("user-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
 
     async function sendMessage() {
         const inputField = document.getElementById("user-input");
@@ -48,14 +277,20 @@
         const modelSelect = document.getElementById("model-select").value;
         const sendBtn = document.getElementById("send-btn");
         const loader = document.getElementById("loader");
+        
         const prompt = inputField.value.trim();
+        if (!prompt) return;
 
-        if (!prompt) return alert("Prompt tidak boleh kosong!");
+        // Tambahkan chat pengguna ke layar
+        chatBox.innerHTML += `<div class="message msg-user">${prompt}</div>`;
+        
+        // Scroll ke bawah otomatis
+        chatBox.scrollTop = chatBox.scrollHeight;
 
+        // Persiapan UI saat loading
         inputField.value = "";
         sendBtn.disabled = true;
         loader.style.display = "block";
-        chatBox.innerHTML = "<em>Berkomunikasi dengan server...</em>";
 
         try {
             const response = await fetch(BACKEND_URL, {
@@ -69,15 +304,18 @@
             
             const data = await response.json();
             
-            if (!response.ok) throw new Error(data.error || "Terjadi kesalahan pada server.");
+            if (!response.ok) throw new Error(data.error || "Gagal menghubungi server.");
             
-            chatBox.innerHTML = `<strong>Jawaban:</strong><br><br>${data.reply}`;
+            // Format ganti baris dari AI agar rapi di HTML
+            const formattedReply = data.reply.replace(/\n/g, '<br>');
+            chatBox.innerHTML += `<div class="message msg-ai">${formattedReply}</div>`;
 
         } catch (error) {
-            chatBox.innerHTML = `<span style="color: red;"><strong>Error:</strong> ${error.message}</span>`;
+            chatBox.innerHTML += `<div class="message msg-ai" style="color: red; border-color: red;"><strong>Error:</strong> ${error.message}</div>`;
         } finally {
             sendBtn.disabled = false;
             loader.style.display = "none";
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
     }
 </script>
